@@ -167,33 +167,42 @@ def run_mass_collector(target_count: int = 7500, max_workers: int = 6, skip_exis
         except Exception as ex:
             return idx, entry, None, str(ex), 0, 0
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-        future_map = {
-            executor.submit(_process_wrapper, entry, i + 1): entry
-            for i, entry in enumerate(to_process)
-        }
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_map = {
+                executor.submit(_process_wrapper, entry, i + 1): entry
+                for i, entry in enumerate(to_process)
+            }
 
-        for future in concurrent.futures.as_completed(future_map):
-            completed_count += 1
-            idx, entry, res, err, kodik_cnt, ep_cnt = future.result()
-            pct = (completed_count / total_to_process) * 100
+            for future in concurrent.futures.as_completed(future_map):
+                completed_count += 1
+                idx, entry, res, err, kodik_cnt, ep_cnt = future.result()
+                pct = (completed_count / total_to_process) * 100
 
-            if res and not err:
-                collected_results.append(res)
-                print(
-                    f"[{completed_count:4d}/{total_to_process:4d}] ({pct:5.1f}%) "
-                    f"+ '{entry.get('ru') or entry['en']}' (ID: {entry['shiki_id']}) -> {kodik_cnt} Kodik dubs, {ep_cnt} eps",
-                    flush=True,
-                )
-            else:
-                print(
-                    f"[{completed_count:4d}/{total_to_process:4d}] ({pct:5.1f}%) "
-                    f"! Error on '{entry['en']}': {err}",
-                    flush=True,
-                )
-
-    elapsed = round(time.perf_counter() - t_start, 2)
-    print(f"\n=== Mass Parsing Complete in {elapsed}s! Added {len(collected_results)} new titles to SQLite. ===", flush=True)
+                if res and not err:
+                    collected_results.append(res)
+                    print(
+                        f"[{completed_count:4d}/{total_to_process:4d}] ({pct:5.1f}%) "
+                        f"+ '{entry.get('ru') or entry['en']}' (ID: {entry['shiki_id']}) -> {kodik_cnt} Kodik dubs, {ep_cnt} eps",
+                        flush=True,
+                    )
+                else:
+                    print(
+                        f"[{completed_count:4d}/{total_to_process:4d}] ({pct:5.1f}%) "
+                        f"! Error on '{entry['en']}': {err}",
+                        flush=True,
+                    )
+    except KeyboardInterrupt:
+        print("\n[!] Parsing paused by user (Ctrl+C). Saving database chunks...", flush=True)
+    finally:
+        elapsed = round(time.perf_counter() - t_start, 2)
+        print(f"\n=== Progress Saved! Total new titles collected: {len(collected_results)} (took {elapsed}s) ===", flush=True)
+        try:
+            from scripts.prepare_data import compress_and_split
+            print("Auto-packaging database into <60MB GitHub chunks...", flush=True)
+            compress_and_split()
+        except Exception as e:
+            log.warning("Could not auto-split DB: %s", e)
 
 
 def _sync_json_catalog():
