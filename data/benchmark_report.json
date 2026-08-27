@@ -1,0 +1,52 @@
+{
+  "tested_titles": [
+    {
+      "key": "cowboy-bebop",
+      "name": "Cowboy Bebop",
+      "timings": {
+        "anilist_sec": 0.663,
+        "shikimori_sec": 4.837,
+        "animethemes_sec": 3.864,
+        "manga_sec": 1.325,
+        "sakuga_sec": 0.304,
+        "google_translate_sec": 0.798,
+        "animan_sec": 0.011,
+        "total_sequential_sec": 11.802,
+        "parallel_async_sec": 5.785,
+        "speedup": 2.04
+      }
+    },
+    {
+      "key": "death-note",
+      "name": "Death Note",
+      "timings": {
+        "anilist_sec": 0.685,
+        "shikimori_sec": 1.759,
+        "animethemes_sec": 4.071,
+        "manga_sec": 1.676,
+        "sakuga_sec": 0.243,
+        "google_translate_sec": 0.431,
+        "animan_sec": 0.005,
+        "total_sequential_sec": 8.87,
+        "parallel_async_sec": 5.137,
+        "speedup": 1.73
+      }
+    },
+    {
+      "key": "fma-brotherhood",
+      "name": "Fullmetal Alchemist: Brotherhood",
+      "timings": {
+        "anilist_sec": 0.702,
+        "shikimori_sec": 4.411,
+        "animethemes_sec": 4.306,
+        "manga_sec": 1.2,
+        "sakuga_sec": 0.337,
+        "google_translate_sec": 0.611,
+        "animan_sec": 0.009,
+        "total_sequential_sec": 11.576,
+        "parallel_async_sec": 6.238,
+        "speedup": 1.86
+      }
+    }
+  ]
+}

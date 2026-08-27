@@ -1,0 +1,16 @@
+{
+  "name": "anime-parsing-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Multi-Source Anime Parser, SQLite FTS5 Catalog, JIT Stream Resolver & React UI",
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "python backend/server.py",
+    "build": "cd frontend && npm install && npm run build",
+    "prepare:data": "python backend/scripts/prepare_data.py restore",
+    "start": "python backend/server.py"
+  },
+  "keywords": ["anime", "parser", "shikimori", "anilist", "kodik", "react", "vite", "sqlite", "hls"],
+  "author": "",
+  "license": "MIT"
+}

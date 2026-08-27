@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+*/node_modules/
+package-lock.json
+
+# Environment variables & secrets
+.env
+*.env
+!.env.example
+!backend/.env.example
+
+# Python
+__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Vite & Frontend build artifacts
+frontend/dist/
+frontend/.ssr-out/
+dist/
+.ssr-out/
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Large SQLite & raw JSON data (>100MB blocked by GitHub)
+# The database is stored in split gzip chunks: data/anime.db.gz.00, data/anime.db.gz.01, etc.
+# These split chunks are automatically reconstructed into data/anime.db on launch.
+data/anime.db
+data/anime.db-wal
+data/anime.db-shm
+data/anime.db.gz
+data/anime.db.gz.temp
+data/anime.db.gz.tmp
+data/anime.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

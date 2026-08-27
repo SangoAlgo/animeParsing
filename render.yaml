@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: anime-parsing
+    env: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: HOST
+        value: 0.0.0.0
+      - key: KODIK_PROXY
+        value: ""

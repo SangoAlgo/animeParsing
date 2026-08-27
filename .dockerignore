@@ -1,0 +1,14 @@
+node_modules
+*/node_modules
+.git
+.gitignore
+.env
+__pycache__
+*/__pycache__
+*.pyc
+*.pyo
+data/anime.db
+data/anime.db-wal
+data/anime.db-shm
+data/anime.json
+frontend/.ssr-out
