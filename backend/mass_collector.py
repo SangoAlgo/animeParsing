@@ -114,29 +114,40 @@ def fetch_shikimori_catalog(target_count: int = 1000) -> list[dict]:
     return all_titles
 
 
-def get_existing_keys_in_db() -> set[str]:
-    """Returns the set of keys already stored in data/anime.db."""
+def get_existing_in_db() -> tuple[set[str], set[int]]:
+    """Returns the set of keys and shikimori_ids already stored in data/anime.db."""
     init_db(DB_PATH)
     conn = get_connection(DB_PATH)
     cur = conn.cursor()
-    cur.execute("SELECT key FROM titles")
+    cur.execute("SELECT key, shikimori_id FROM titles")
     rows = cur.fetchall()
     conn.close()
-    return {r["key"] for r in rows}
+    keys = {r["key"] for r in rows if r["key"]}
+    shiki_ids = {int(r["shikimori_id"]) for r in rows if r["shikimori_id"] is not None}
+    return keys, shiki_ids
 
 
-def run_mass_collector(target_count: int = 1000, max_workers: int = 4, skip_existing: bool = True):
+def run_mass_collector(target_count: int = 7500, max_workers: int = 6, skip_existing: bool = True):
     """Runs the parallel mass collector with rate limit safety and progressive disk persistence."""
     init_db(DB_PATH)
     t_start = time.perf_counter()
 
+    existing_keys, existing_shiki_ids = get_existing_in_db() if skip_existing else (set(), set())
+    print(f"=== Database Status: {len(existing_keys)} titles already in DB ({len(existing_shiki_ids)} Shikimori IDs) ===", flush=True)
+
     catalog_entries = fetch_shikimori_catalog(target_count=target_count)
 
-    existing_keys = get_existing_keys_in_db() if skip_existing else set()
-    to_process = [e for e in catalog_entries if e["key"] not in existing_keys]
+    to_process = [
+        e for e in catalog_entries
+        if e["key"] not in existing_keys and e.get("shiki_id") not in existing_shiki_ids
+    ]
 
-    print(f"=== Starting Mass Parsing: {len(to_process)} to parse ({len(existing_keys)} already in DB) ===", flush=True)
+    print(f"=== Starting Mass Parsing: {len(to_process)} new titles to parse ===", flush=True)
     print(f"Workers: {max_workers} parallel title threads", flush=True)
+
+    if not to_process:
+        print("All target titles are already in the database! Nothing to parse.", flush=True)
+        return
 
     completed_count = 0
     total_to_process = len(to_process)
@@ -181,17 +192,12 @@ def run_mass_collector(target_count: int = 1000, max_workers: int = 4, skip_exis
                     flush=True,
                 )
 
-            # Periodically sync data/anime.json every 50 titles
-            if completed_count % 50 == 0 or completed_count == total_to_process:
-                _sync_json_catalog()
-
     elapsed = round(time.perf_counter() - t_start, 2)
-    print(f"\n=== Mass Parsing Complete in {elapsed}s! ===", flush=True)
-    _sync_json_catalog()
+    print(f"\n=== Mass Parsing Complete in {elapsed}s! Added {len(collected_results)} new titles to SQLite. ===", flush=True)
 
 
 def _sync_json_catalog():
-    """Exports SQLite DB to data/anime.json for backward compatibility."""
+    """Exports SQLite DB to data/anime.json for backward compatibility (optional)."""
     try:
         conn = get_connection(DB_PATH)
         cur = conn.cursor()
